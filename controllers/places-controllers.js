@@ -1,5 +1,7 @@
 const express = require('express')
 
+const HttpError = require('../errors/http-error')
+
 const DUMMY_PLACES = [
     {
         id: 'p1',
@@ -34,9 +36,7 @@ const getPlace = async (req,res,next)=> {
         return placeId === p.id;
     })
     if(!place){
-        const error = new Error('Could not find a place for the provided id.')
-        error.code = 404;
-        return next(error);
+        return next( new HttpError('Could not find a place for the provided id.',404));
     }
     res.json({place});
 }
@@ -46,13 +46,39 @@ const getUserPlaces = async (req,res,next)=> {
     const places = DUMMY_PLACES.filter(p => p.creatorId === userId)
 
     if(places.length === 0){
-        // console.log('hello g')
-        // return res.status(404).json({message: 'Could not find places for the provided user id.'})
-        const error = new Error('Could not find places for the provided user id.')
-        error.code = 404;
-        return next(error);
+        return next(new HttpError('Could not find places for the provided user id.',404));
     }
     res.json({places})
 }
 
-module.exports = {getPlace, getUserPlaces}
+const createPlace = async (req,res)=> {
+    const {title, description, location, address, creatorId} = req.body;
+    const createdPlace = {title,description,location, address, creatorId}
+    DUMMY_PLACES.push(createdPlace);
+
+    res.status(201).json({place: createdPlace})
+}
+
+const updatePlace = async (req,res)=> {
+    const {pid} = req.params;
+    const {title, description} = req.body
+    const place ={ ...DUMMY_PLACES.find(p => p.id === pid)};
+    // console.log(Object.keys(place).length === 0)
+    if(Object.keys(place).length !== 0){
+        const updatedPlace = {...place,title, description};
+        DUMMY_PLACES[DUMMY_PLACES.findIndex(p => p.id == pid)] = updatedPlace;
+        res.status(200).json({place:updatedPlace})
+    }
+    else{
+        res.status(400).json({message: "Invalid place id"})
+    }
+    
+}
+
+const deletePlace = async (req,res)=> {
+    const {pid} = req.params;
+    res.status(200).json({message: "Place deleted successfully"})
+}
+
+
+module.exports = {getPlace, getUserPlaces, createPlace,updatePlace, deletePlace }
