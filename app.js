@@ -1,4 +1,6 @@
 const express = require('express');
+const mongoose = require('mongoose')
+require('dotenv').config()
 
 const usersRouter = require('./routes/users-routes');
 const placesRouter = require('./routes/places-routes');
@@ -21,6 +23,16 @@ app.use(notFound);
 app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5000;
-app.listen(port, ()=> {
-    console.log(`Server listening to port: ${port}`)
-})
+
+const start = async ()=>{
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        app.listen(port, ()=> {
+            console.log(`Server listening to port: ${port}`)
+        })
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+start();
