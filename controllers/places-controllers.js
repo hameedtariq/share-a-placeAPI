@@ -1,6 +1,8 @@
 const express = require('express')
+const {validationResult} = require('express-validator')
 
 const HttpError = require('../errors/http-error')
+const getCordinates = require('../util/location.')
 
 const DUMMY_PLACES = [
     {
@@ -51,15 +53,23 @@ const getUserPlaces = async (req,res,next)=> {
     res.json({places})
 }
 
-const createPlace = async (req,res)=> {
-    const {title, description, location, address, creatorId} = req.body;
-    const createdPlace = {title,description,location, address, creatorId}
+const createPlace = async (req,res,next)=> {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return next(new HttpError('Invalid inputs passes, please check your data.', 422))
+    }
+    const {title, description, address, creatorId} = req.body;
+    const createdPlace = {title,description,location: getCordinates(address), address, creatorId}
     DUMMY_PLACES.push(createdPlace);
 
     res.status(201).json({place: createdPlace})
 }
 
 const updatePlace = async (req,res)=> {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return next(new HttpError('Invalid inputs passes, please check your data.', 422))
+    }
     const {pid} = req.params;
     const {title, description} = req.body
     const place ={ ...DUMMY_PLACES.find(p => p.id === pid)};
