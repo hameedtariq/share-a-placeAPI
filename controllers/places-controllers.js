@@ -59,7 +59,7 @@ const getUserPlaces = async (req,res,next)=> {
     } catch (error) {
         return next(new HttpError('Something went wrong while fetching places from database', 500))
     }
-    res.json({places})
+    res.json({places: places.map((place)=> place.toObject({getters: true}))})
 }
 
 const createPlace = async (req,res,next)=> {
@@ -101,7 +101,13 @@ const updatePlace = async (req,res, next)=> {
 
 const deletePlace = async (req,res)=> {
     const {pid} = req.params;
-    res.status(200).json({message: "Place deleted successfully"})
+    try {
+        const place = await Place.findByIdAndDelete(pid);
+        res.status(200).json({message: "Place deleted successfully", place: place.toObject({getters: true})})
+
+    } catch (error) {
+        return next(new HttpError('Error Occured while deleting the place'))        
+    }
 }
 
 

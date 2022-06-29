@@ -15,7 +15,7 @@ const loginUserValidators = [
     check('password').isLength({min: 6}),
 ]
 
-
+//   api/users/
 router.get('/', getAllUsers)
 router.post('/signup',signupUserValidators, signupUser)
 router.post('/login',loginUserValidators, loginUser)
