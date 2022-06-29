@@ -1,9 +1,11 @@
 const express = require('express')
+const mongoose = require('mongoose')
 const {validationResult} = require('express-validator')
 
 const HttpError = require('../errors/http-error')
 const getCordinates = require('../util/location.')
 const Place = require('../models/place')
+const User =  require('../models/user')
 
 const DUMMY_PLACES = [
     {
@@ -68,10 +70,27 @@ const createPlace = async (req,res,next)=> {
         return next(new HttpError('Invalid inputs passes, please check your data.', 422))
     }
     const {title, description, address, creatorId} = req.body;
-    const createdPlace = new Place({title,description,location: getCordinates(address), address, creatorId})
+    
     
     try {
-        await createdPlace.save()        
+        // first lets verify if user exists;
+        const user = await User.findById(creatorId);
+        if(!user){
+            return next(new HttpError('Please login first in order to create a place', 401))
+        }
+        const createdPlace = new Place({title,description,location: getCordinates(address), address, creatorId});
+
+
+
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        await createdPlace.save({session})
+        user.places.push(createdPlace);
+        await user.save();
+
+        await session.commitTransaction();
+        res.status(201).json({place: createdPlace.toObject({getters:true})})            
     } catch (error) {
         console.log(
             error
@@ -79,7 +98,6 @@ const createPlace = async (req,res,next)=> {
         return next(new HttpError('Error occured while creating place', 500))
     }
 
-    res.status(201).json({place: createdPlace.toObject({getters:true})})
 }
 
 const updatePlace = async (req,res, next)=> {

@@ -24,8 +24,9 @@ const placeSchema = new mongoose.Schema({
         }
     },
     creatorId: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         required: true,
+        ref: 'User',
     }
 })
 

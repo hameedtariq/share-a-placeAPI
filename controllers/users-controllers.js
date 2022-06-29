@@ -29,7 +29,7 @@ const signupUser = async (req,res,next )=> {
             email,
             password,
             image: "https://i.pinimg.com/736x/56/af/b9/56afb9a7f9dcf4dc9c4bad28955a0fe4.jpg",
-            places: "p1"
+            places: [],
         })
         res.status(201).json({user: user.toObject({getters: true})})
     } catch (error) {
