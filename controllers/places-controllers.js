@@ -7,36 +7,12 @@ const getCordinates = require('../util/location.')
 const Place = require('../models/place')
 const User =  require('../models/user')
 
-const DUMMY_PLACES = [
-    {
-        id: 'p1',
-        title: 'Empire State Building',
-        description: 'One of the most famous sky scrapers in world!',
-        imageURL: 'https://media.timeout.com/images/101705309/750/422/image.jpg',
-        address: '20 W 34th St., New York, NY 10001, United States',
-        location: {
-            lat: 40.7484,
-            lng: -73.9857,
-        },
-        creatorId: 'u2'
-    },
-    {
-        id: 'p2',
-        title: 'Badshahi Mosque',
-        description: 'One of the most famous Mosques of the world',
-        imageURL: 'https://www.maxpixel.net/static/photo/1x/Badshahi-Mosque-Lahore-Lhr-Badshahi-Mosque-Lahore-2299807.jpg',
-        address: '20 W 34th St., New York, NY 10001, United States',
-        location: {
-            lat: 31.5879664,
-            lng: 74.3085249,
-        },
-        creatorId: 'u1'
-    }
-]
 
 
 const getPlace = async (req,res,next)=> {
     const placeId = req.params.pid;
+
+       
     let place;
     try {
         place = await Place.findById(placeId);
@@ -52,6 +28,14 @@ const getPlace = async (req,res,next)=> {
 
 const getUserPlaces = async (req,res,next)=> {
     const userId = req.params.uid;
+
+    /* 
+        An Alternative way by using 'populate'
+        let userWithPlaces = User.findById(userId).populate('places')
+        userWithPlaces.places will contain all the user places 
+
+    */
+    
     let places;
     try {
         places = await Place.find({creatorId: userId});
@@ -117,10 +101,22 @@ const updatePlace = async (req,res, next)=> {
     
 }
 
-const deletePlace = async (req,res)=> {
+const deletePlace = async (req,res,next)=> {
     const {pid} = req.params;
     try {
-        const place = await Place.findByIdAndDelete(pid);
+        const place = await Place.findById(pid).populate('creatorId');
+        if(!place){
+            return next(new HttpError('Place that you\'re trying to delete does not exists',400))
+        }
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        await place.remove({session});
+        await place.creatorId.places.pull(place);
+        await place.creatorId.save({session});
+
+        await session.commitTransaction();
+
         res.status(200).json({message: "Place deleted successfully", place: place.toObject({getters: true})})
 
     } catch (error) {
