@@ -18,7 +18,7 @@ const updatePlaceValidators = [
     check('title').not().isEmpty(),
     check('description').isLength({min: 5}),
 ]
-
+// api/places
 
 router.get('/:pid', getPlace)
 router.get('/user/:uid', getUserPlaces)

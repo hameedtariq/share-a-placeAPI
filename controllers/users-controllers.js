@@ -31,7 +31,7 @@ const signupUser = async (req,res,next )=> {
             image: "https://i.pinimg.com/736x/56/af/b9/56afb9a7f9dcf4dc9c4bad28955a0fe4.jpg",
             places: [],
         })
-        res.status(201).json({user: user.toObject({getters: true})})
+        res.status(201).json({user: user.toObject({getters: true}),  message: "Signed up successfully!"})
     } catch (error) {
         console.log(error)
         return next(new HttpError('Error occured while sign up. Please try again later'), 500)
@@ -53,7 +53,7 @@ const loginUser = async (req,res,next)=> {
         if(user.password !== password){
             return next(new HttpError('You entered an invalid password. Please try again'), 401)
         }
-        res.status(200).json({user: user.toObject({getters: true})})
+        res.status(200).json({user: user.toObject({getters: true}), message: "Logged in successfully!"})
     } catch (error) {
         return next(new HttpError('Error while logging in. Please try again later'), 500)
     }

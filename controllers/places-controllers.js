@@ -49,6 +49,7 @@ const getUserPlaces = async (req,res,next)=> {
 }
 
 const createPlace = async (req,res,next)=> {
+    // console.log('first')
     const errors = validationResult(req);
     if(!errors.isEmpty()){
         return next(new HttpError('Invalid inputs passes, please check your data.', 422))
