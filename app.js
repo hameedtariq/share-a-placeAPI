@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose')
+const path = require('path')
 require('dotenv').config()
 
 const usersRouter = require('./routes/users-routes');
@@ -26,6 +27,7 @@ app.use((req,res,next) => {
 app.get('/', (req,res)=> {
     res.send('Testing...')
 })
+app.use('/uploads/images', express.static(path.join('uploads', 'images')))
 app.use('/api/places', placesRouter)
 app.use('/api/users', usersRouter)
 

@@ -2,7 +2,8 @@ const express = require('express')
 const {check} = require('express-validator')
 
 
-const {getPlace, getUserPlaces, createPlace, updatePlace, deletePlace} = require('../controllers/places-controllers')
+const {getPlace, getUserPlaces, createPlace, updatePlace, deletePlace} = require('../controllers/places-controllers');
+const fileUpload = require('../middleware/fileUpload');
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ const updatePlaceValidators = [
 
 router.get('/:pid', getPlace)
 router.get('/user/:uid', getUserPlaces)
-router.post('/', createPlaceValidators, createPlace)
+router.post('/', fileUpload.single('image'), createPlaceValidators, createPlace)
 router.patch('/:pid',updatePlaceValidators, updatePlace)
 router.delete('/:pid', deletePlace)
 

@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const {validationResult} = require('express-validator')
+const fs = require('fs')
 
 const HttpError = require('../errors/http-error')
 const getCordinates = require('../util/location.')
@@ -63,7 +64,7 @@ const createPlace = async (req,res,next)=> {
         if(!user){
             return next(new HttpError('Please login first in order to create a place', 401))
         }
-        const createdPlace = new Place({title,description,location: getCordinates(address), address, creatorId});
+        const createdPlace = new Place({title,description,location: getCordinates(address), address, creatorId, image: req.file.path});
 
 
 
@@ -117,6 +118,12 @@ const deletePlace = async (req,res,next)=> {
         await place.creatorId.save({session});
 
         await session.commitTransaction();
+
+        fs.unlink(place.image, (err)=> {
+            if(err){
+                console.log(err);
+            }
+        })
 
         res.status(200).json({message: "Place deleted successfully", place: place.toObject({getters: true})})
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const {check} = require('express-validator') 
 const { getAllUsers, signupUser, loginUser } = require('../controllers/users-controllers');
+const fileUpload = require('../middleware/fileUpload');
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ const loginUserValidators = [
 
 //   api/users/
 router.get('/', getAllUsers)
-router.post('/signup',signupUserValidators, signupUser)
+router.post('/signup', fileUpload.single('image'), signupUserValidators, signupUser)
 router.post('/login',loginUserValidators, loginUser)
 
 

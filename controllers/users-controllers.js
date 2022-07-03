@@ -28,7 +28,7 @@ const signupUser = async (req,res,next )=> {
             name,
             email,
             password,
-            image: "https://i.pinimg.com/736x/56/af/b9/56afb9a7f9dcf4dc9c4bad28955a0fe4.jpg",
+            image: req.file.path,
             places: [],
         })
         res.status(201).json({user: user.toObject({getters: true}),  message: "Signed up successfully!"})
