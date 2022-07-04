@@ -92,10 +92,16 @@ const updatePlace = async (req,res, next)=> {
         return next(new HttpError('Invalid inputs passes, please check your data.', 422))
     }
     const {pid} = req.params;
-    const {title, description} = req.body
+    const {title, description,user: {id}} = req.body
     try {
-        const place = await Place.findByIdAndUpdate(pid, {title,description}, {new:true})
-        res.status(200).json({place: place.toObject({getters:true})})
+        const place = await Place.findById(pid);
+        if(place.creatorId.toString() !== id){
+            return next(new HttpError('You are not allowed to edit this place', 401));
+        }
+        place.title = title;
+        place.description = description;
+        const updatedPlace = await place.save();
+        res.status(200).json({place: updatedPlace.toObject({getters:true})})
     } catch (error) {
         return next(new HttpError('Error occured while updating the place', 500))
     }
@@ -110,6 +116,11 @@ const deletePlace = async (req,res,next)=> {
         if(!place){
             return next(new HttpError('Place that you\'re trying to delete does not exists',400))
         }
+
+        if(place.creatorId.id !== req.body.user.id){
+            return next(new HttpError('You are not allowed to delete this place.', 401));
+        }
+
         const session = await mongoose.startSession();
         session.startTransaction();
 
